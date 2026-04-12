@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.iotapp.data.remote.api.RetrofitClient
 import com.example.iotapp.data.remote.dto.SensorItemDto
+import com.example.iotapp.data.remote.dto.SensorTypeDto
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +15,7 @@ data class DataSensorState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val data: List<SensorItemDto> = emptyList(),
+    val availableSensors: List<SensorTypeDto> = emptyList(),
     
     // Pagination & Filters
     val sensorId: String = "All", // "All", "Temp", "Humidity", "Light"
@@ -32,7 +34,23 @@ class DataSensorViewModel : ViewModel() {
 
     init {
         // Initial fetch
+        fetchSensors()
         fetchData()
+    }
+
+    private fun fetchSensors() {
+        viewModelScope.launch {
+            try {
+                val res = RetrofitClient.apiService.getSensors()
+                if (res.isSuccessful && res.body() != null) {
+                    _state.value = _state.value.copy(
+                        availableSensors = res.body()!!.data
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("DataSensorViewModel", "Failed to fetch sensors", e)
+            }
+        }
     }
 
     fun onSensorChange(sensorId: String) {
@@ -83,11 +101,11 @@ class DataSensorViewModel : ViewModel() {
         fetchJob = viewModelScope.launch {
             try {
                 // Map filter values to what API expects
-                val sensorFilter = when (currentState.sensorId) {
-                    "Temp" -> "1"
-                    "Humidity" -> "2"
-                    "Light" -> "3"
-                    else -> "all"
+                val sensorFilter = if (currentState.sensorId == "All") {
+                    "all"
+                } else {
+                    val matchedSensor = currentState.availableSensors.find { it.name == currentState.sensorId }
+                    matchedSensor?.id?.toString() ?: "all"
                 }
 
                 val dateFilter = currentState.date.takeIf { it.isNotBlank() }

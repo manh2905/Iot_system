@@ -106,9 +106,9 @@ fun TableRow(data: SensorItemDto) {
     }
 
     val displaySensorName = when (data.idSensor) {
-        3 -> "Light"
-        2 -> "Humidity"
-        1 -> "Temp"
+        3 -> "Ánh sáng"
+        2 -> "Độ ẩm"
+        1 -> "Nhiệt độ"
         else -> "Sensor ${data.idSensor}"
     }
 

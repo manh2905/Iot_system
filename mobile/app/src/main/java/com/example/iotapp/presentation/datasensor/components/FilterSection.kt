@@ -28,6 +28,7 @@ fun FilterSection(
     limitStr: String,
     sortBy: String,
     sortOrder: String,
+    sensorOptions: List<String>,
     onDateChange: (String) -> Unit,
     onSensorChange: (String) -> Unit,
     onValueChange: (String) -> Unit,
@@ -98,7 +99,7 @@ fun FilterSection(
                 Text("Sensor:", color = Color.White.copy(alpha = 0.5f), fontSize = 12.sp, modifier = Modifier.padding(end=8.dp))
                 FilterDropdown(
                     selectedText = sensorId,
-                    options = listOf("All", "Temp", "Humidity", "Light"),
+                    options = sensorOptions,
                     onSelect = onSensorChange
                 )
             }

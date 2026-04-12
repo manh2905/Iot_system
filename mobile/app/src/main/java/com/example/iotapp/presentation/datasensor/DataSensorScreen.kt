@@ -100,6 +100,7 @@ fun DataSensorScreen() {
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Filter Section
+                val sensorOptions = listOf("All") + state.availableSensors.map { it.name }
                 FilterSection(
                     date = state.date,
                     sensorId = state.sensorId,
@@ -107,6 +108,7 @@ fun DataSensorScreen() {
                     limitStr = state.limitStr,
                     sortBy = state.sortBy,
                     sortOrder = state.sortOrder,
+                    sensorOptions = sensorOptions,
                     onDateChange = viewModel::onDateChange,
                     onSensorChange = viewModel::onSensorChange,
                     onValueChange = viewModel::onValueChange,

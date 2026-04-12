@@ -142,11 +142,11 @@ fun HomeScreen(
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(20.dp))
-            ChartView(data = state.tempHistory, label = "Temperature Trend", yMax = 50f, fillColor = Color(0xFFA7191B), lineColor = Color(0xFFA7191B))
+            ChartView(data = state.tempHistory, label = "Temperature", yMax = 50f, fillColor = Color(0xFFA7191B), lineColor = Color(0xFFA7191B))
             Spacer(modifier = Modifier.height(20.dp))
-            ChartView(data = state.humHistory, label = "Humidity Trend", yMax = 100f, fillColor = Color(0xFF387AE2), lineColor = Color(0xFF387AE2))
+            ChartView(data = state.humHistory, label = "Humidity", yMax = 100f, fillColor = Color(0xFF387AE2), lineColor = Color(0xFF387AE2))
             Spacer(modifier = Modifier.height(20.dp))
-            ChartView(data = state.lightHistory, label = "Light Trend", yMax = 4095f, fillColor = Color(0xFFFDC124), lineColor = Color(0xFFFDC124))
+            ChartView(data = state.lightHistory, label = "Light", yMax = 4095f, fillColor = Color(0xFFFDC124), lineColor = Color(0xFFFDC124))
 
             Spacer(modifier = Modifier.height(30.dp))
 

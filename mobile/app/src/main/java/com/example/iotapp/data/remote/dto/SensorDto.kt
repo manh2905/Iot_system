@@ -17,3 +17,13 @@ data class SensorItemDto(
     val displayId: String
         get() = "#$id"
 }
+
+data class SensorListResponse(
+    val success: Boolean,
+    val data: List<SensorTypeDto>
+)
+
+data class SensorTypeDto(
+    val id: Int,
+    val name: String
+)

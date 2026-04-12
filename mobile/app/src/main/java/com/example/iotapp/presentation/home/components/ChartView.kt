@@ -44,8 +44,8 @@ fun ChartView(
     ) {
         Text(
             text = label,
-            color = Color.White,
-            fontSize = 20.sp,
+            color = Color.Gray,
+            fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold
         )
         Spacer(modifier = Modifier.height(20.dp))

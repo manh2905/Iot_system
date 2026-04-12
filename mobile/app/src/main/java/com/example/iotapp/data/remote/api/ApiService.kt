@@ -2,7 +2,9 @@ package com.example.iotapp.data.remote.api
 
 import com.example.iotapp.data.remote.dto.DeviceDto
 import com.example.iotapp.data.remote.dto.PaginatedSensorResponse
+import com.example.iotapp.data.remote.dto.SensorListResponse
 import com.example.iotapp.data.remote.dto.PaginatedActionResponse
+import com.example.iotapp.data.remote.dto.DeviceLatestStatusResponse
 import okhttp3.Request
 import retrofit2.Response
 import retrofit2.http.Body
@@ -30,6 +32,12 @@ interface ApiService {
         @Query("value") value: Double?
     ): Response<PaginatedSensorResponse>
 
+    @GET("api/sensors")
+    suspend fun getSensors(): Response<SensorListResponse>
+
+    @GET("api/devices/latest-status")
+    suspend fun getLatestDeviceStatus(): Response<DeviceLatestStatusResponse>
+
     @GET("api/devices/action/device/{deviceId}")
     suspend fun getActionHistory(
         @Path("deviceId") deviceId: String,
@@ -41,4 +49,5 @@ interface ApiService {
         @Query("sortOrder") sortOrder: String,
         @Query("date") date: String?
     ): Response<PaginatedActionResponse>
+    
 }

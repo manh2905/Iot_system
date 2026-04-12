@@ -25,6 +25,7 @@ class HomeViewModel : ViewModel (){
         connectSocket()
         observeSensor()
         observeDeviceStatus()
+        fetchLatestDeviceStatus()
     }
 
     private fun observeSensor() {
@@ -50,6 +51,30 @@ class HomeViewModel : ViewModel (){
                         else -> _state.value
                     }
                 }
+            }
+        }
+    }
+
+    private fun fetchLatestDeviceStatus() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.apiService.getLatestDeviceStatus()
+                if (response.isSuccessful) {
+                    val statuses = response.body()?.data ?: emptyList()
+                    var currentState = _state.value
+                    statuses.forEach { statusInfo ->
+                        val isChecked = statusInfo.status == "ON"
+                        currentState = when (statusInfo.deviceId) {
+                            Constants.DEVICE_FAN -> currentState.copy(fanState = currentState.fanState.copy(isChecked = isChecked))
+                            Constants.DEVICE_LIGHT -> currentState.copy(lightState = currentState.lightState.copy(isChecked = isChecked))
+                            Constants.DEVICE_AC -> currentState.copy(acState = currentState.acState.copy(isChecked = isChecked))
+                            else -> currentState
+                        }
+                    }
+                    _state.value = currentState
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

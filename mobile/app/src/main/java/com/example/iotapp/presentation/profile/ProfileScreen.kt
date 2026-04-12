@@ -2,6 +2,7 @@ package com.example.iotapp.presentation.profile
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,6 +24,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -118,11 +120,14 @@ fun ProfileScreen() {
                         .background(Color(0xFF152A1B)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Avatar",
-                        tint = Color.White.copy(alpha = 0.5f),
-                        modifier = Modifier.size(60.dp)
+                    // Thay thế Icon bằng Image
+                    Image(
+
+                        painter = painterResource(id = R.drawable.your_picture),
+                        contentDescription = "Avatar của tôi",
+
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
@@ -169,7 +174,7 @@ fun ProfileScreen() {
                     subtitle = "Project documentation and analysis",
                     icon = R.drawable.ic_pdf,
                     iconTint = AccentGreen,
-                    onClick = { openUrl("https://drive.google.com/file/d/1DGHkxMXjDcTmpCSsWu1xNwXrV7ys6CYy/view?usp=sharing") } // Vui lòng thay thế bằng link thực tế
+                    onClick = { openUrl("https://drive.google.com/file/d/1XmJ83ZmhuS8Ofq8FOanusfojbAAHoh1e/view?usp=sharing") }
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -179,7 +184,7 @@ fun ProfileScreen() {
                     subtitle = "Backend endpoint specifications",
                     icon = R.drawable.ic_docs,
                     iconTint = AccentGreen,
-                    onClick = { openUrl("http://172.20.10.4:3000/api-docs/#/") } // Vui lòng thay thế bằng host backend thực tế
+                    onClick = { openUrl("http://172.20.10.4:3000/api-docs/#/") }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -189,7 +194,7 @@ fun ProfileScreen() {
                     subtitle = "Source code and repository",
                     icon = R.drawable.ic_git,
                     iconTint = AccentGreen,
-                    onClick = { openUrl("https://github.com/manhvu337") } // Vui lòng thay thế 
+                    onClick = { openUrl("https://github.com/manh2905/Iot_system") }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -199,7 +204,7 @@ fun ProfileScreen() {
                     subtitle = "UI/UX Prototypes and assets",
                     icon = R.drawable.ic_figma,
                     iconTint = AccentGreen,
-                    onClick = { openUrl("https://figma.com/") } // Vui lòng thay thế
+                    onClick = { openUrl("https://www.figma.com/design/ehPAXkBDN7KSNerM1gxYKy/IoT?node-id=0-1&p=f&t=4irTHmb7tJjReQoY-0") }
                 )
 
                 Spacer(modifier = Modifier.height(120.dp)) // Bottom Nav Padding
