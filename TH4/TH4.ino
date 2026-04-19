@@ -17,12 +17,14 @@ const char* mqtt_pass = "123456";
 const char* topic_control = "esp32/devices/control";
 const char* topic_status  = "esp32/led/status";
 const char* pub_topic     = "esp32/sensor";
-const char* pub_reconnect     = "esp32/reconnect";
+const char* pub_reconnect = "esp32/reconnect";
 
 // ================= LED =================
 #define LED1 4
 #define LED2 5
 #define LED3 18
+#define LED4 25 // Thêm đèn 4
+#define LED5 26 // Thêm đèn 5
 
 // ================= DHT11 =================
 #define DHTPIN 14
@@ -85,6 +87,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
       if (deviceId == "1") ledPin = LED1;
       if (deviceId == "2") ledPin = LED2;
       if (deviceId == "3") ledPin = LED3;
+      if (deviceId == "4") ledPin = LED4; // Xử lý thiết bị 4
+      if (deviceId == "5") ledPin = LED5; // Xử lý thiết bị 5
 
       if (ledPin == -1) continue;
 
@@ -129,6 +133,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
     if (deviceId == "1") ledPin = LED1;
     if (deviceId == "2") ledPin = LED2;
     if (deviceId == "3") ledPin = LED3;
+    if (deviceId == "4") ledPin = LED4; // Xử lý thiết bị 4
+    if (deviceId == "5") ledPin = LED5; // Xử lý thiết bị 5
 
     if (ledPin == -1) return;
 
@@ -202,6 +208,8 @@ void setup() {
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
   pinMode(LED3, OUTPUT);
+  pinMode(LED4, OUTPUT); // Khởi tạo pin D25
+  pinMode(LED5, OUTPUT); // Khởi tạo pin D26
 
   dht.begin();
 

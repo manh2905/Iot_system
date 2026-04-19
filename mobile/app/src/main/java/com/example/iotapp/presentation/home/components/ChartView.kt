@@ -1,6 +1,11 @@
 package com.example.iotapp.presentation.home.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Color as AndroidColor
+import android.view.MotionEvent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -11,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +27,8 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.listener.ChartTouchListener
+import com.github.mikephil.charting.listener.OnChartGestureListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -33,6 +41,9 @@ fun ChartView(
     lineColor: Color = Color(0xFF4AEA85),
     fillColor: Color = Color(0xFF4AEA85)
 ) {
+    // Lấy context từ Compose để sử dụng cho Clipboard và Toast
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .border(width = 1.dp, color = lineColor, shape = RoundedCornerShape(16.dp))
@@ -51,8 +62,8 @@ fun ChartView(
         Spacer(modifier = Modifier.height(20.dp))
 
         AndroidView(
-            factory = { context ->
-                LineChart(context).apply {
+            factory = { ctx ->
+                LineChart(ctx).apply {
                     // Chart styling
                     description.isEnabled = false
                     legend.isEnabled = false
@@ -101,8 +112,43 @@ fun ChartView(
                 }
             },
             update = { chart ->
+                // Cập nhật sự kiện ấn giữ (Long Press) để copy thời gian
+                chart.onChartGestureListener = object : OnChartGestureListener {
+                    override fun onChartLongPressed(me: MotionEvent?) {
+                        if (me == null) return
+
+                        // Lấy điểm dữ liệu gần nhất với vị trí ngón tay chạm vào
+                        val highlight = chart.getHighlightByTouchPoint(me.x, me.y)
+                        if (highlight != null) {
+                            val index = highlight.x.toInt()
+                            if (index in data.indices) {
+                                val timestamp = data[index].first
+                                val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault())
+                                val formattedTime = sdf.format(Date(timestamp))
+
+                                // Copy vào Clipboard
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("Copied Time", formattedTime)
+                                clipboard.setPrimaryClip(clip)
+
+                                // Hiển thị thông báo Toast
+                                Toast.makeText(context, "Đã sao chép: $formattedTime", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+
+                    // Các hàm bắt buộc phải override (có thể để trống nếu không dùng)
+                    override fun onChartGestureStart(me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?) {}
+                    override fun onChartGestureEnd(me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?) {}
+                    override fun onChartDoubleTapped(me: MotionEvent?) {}
+                    override fun onChartSingleTapped(me: MotionEvent?) {}
+                    override fun onChartFling(me1: MotionEvent?, me2: MotionEvent?, velocityX: Float, velocityY: Float) {}
+                    override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {}
+                    override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {}
+                }
+
                 chart.axisLeft.axisMaximum = yMax
-                
+
                 chart.xAxis.valueFormatter = object : ValueFormatter() {
                     private val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
                     override fun getFormattedValue(value: Float): String {

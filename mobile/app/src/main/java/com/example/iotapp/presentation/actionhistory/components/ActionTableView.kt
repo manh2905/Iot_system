@@ -1,6 +1,11 @@
 package com.example.iotapp.presentation.actionhistory.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -11,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -81,25 +88,29 @@ fun ActionTableView(
 
 @Composable
 fun ActionTableRow(data: ActionItemDto) {
-    
+    // Lấy context để dùng cho Clipboard và Toast
+    val context = LocalContext.current
+
     val iconRes = when (data.idDevice) {
         1 -> R.drawable.ic_light
         2 -> R.drawable.ic_fan
         3 -> R.drawable.ic_ac
-        else -> R.drawable.ic_dashboard // fallback
+        else -> R.drawable.ic_light // fallback
     }
-    
+
     val deviceColor = when (data.idDevice) {
         1 -> Color(0xFF0DBA48) // Green for light
         2 -> Color(0xFF0DBA48) // Green
         3 -> Color(0xFF0DBA48) // Green
-        else -> Color.White
+        else -> Color(0xFF0DBA48)
     }
 
     val displayDeviceName = when (data.idDevice) {
         1 -> "Light"
         2 -> "Fan"
         3 -> "AC"
+        4 -> "Light 2"
+        5 -> "Light 2"
         else -> "Device ${data.idDevice}"
     }
 
@@ -187,7 +198,22 @@ fun ActionTableRow(data: ActionItemDto) {
             text = displayDate,
             color = Color.White.copy(alpha = 0.6f),
             fontSize = 12.sp,
-            modifier = Modifier.weight(1.5f), // Matches TableHeaderText width
+            modifier = Modifier
+                .weight(1.5f)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            val formattedTimeForCopy = data.createdAt.replace("-", "/")
+
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Copied Action Time", formattedTimeForCopy)
+                            clipboard.setPrimaryClip(clip)
+
+                            // Hiển thị Toast
+                            Toast.makeText(context, "Đã sao chép: $formattedTimeForCopy", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                },
             lineHeight = 16.sp,
             maxLines = 2
         )

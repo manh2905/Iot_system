@@ -1,6 +1,11 @@
 package com.example.iotapp.presentation.datasensor.components
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -11,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -90,14 +97,16 @@ fun TableHeaderText(text: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun TableRow(data: SensorItemDto) {
-    
+    // Lấy context để dùng cho Clipboard và Toast
+    val context = LocalContext.current
+
     val iconRes = when (data.idSensor) {
         3 -> R.drawable.ic_light
         2 -> R.drawable.ic_humidity
         1 -> R.drawable.ic_temp
         else -> R.drawable.ic_dashboard // fallback
     }
-    
+
     val color = when (data.idSensor) {
         3 -> Color(0xFFFACC15)
         2 -> Color(0xFF3B82F6)
@@ -183,7 +192,24 @@ fun TableRow(data: SensorItemDto) {
             text = displayDate,
             color = Color.White.copy(alpha = 0.5f),
             fontSize = 12.sp,
-            modifier = Modifier.weight(2f),
+            modifier = Modifier
+                .weight(2f)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            // Chuyển đổi định dạng "2026-03-24 23:28:22" gốc thành "2026/03/24 23:28:22"
+                            val formattedTimeForCopy = data.createdAt.replace("-", "/")
+
+                            // Copy vào Clipboard
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("Copied Time", formattedTimeForCopy)
+                            clipboard.setPrimaryClip(clip)
+
+                            // Hiển thị thông báo Toast
+                            Toast.makeText(context, "Đã sao chép: $formattedTimeForCopy", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                },
             lineHeight = 16.sp,
             maxLines = 2
         )

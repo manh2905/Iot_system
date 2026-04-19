@@ -1,5 +1,6 @@
 package com.example.iotapp.presentation.home
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,17 +9,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.collectLatest
 import com.example.iotapp.R
 import com.example.iotapp.core.utils.Constants
 import com.example.iotapp.core.ui.theme.AccentGreen
@@ -75,7 +75,6 @@ fun HomeScreen(
                     modifier = Modifier.size(50.dp),
                     shape = MaterialTheme.shapes.medium,
                     color = DeepGreen.copy(alpha = 1f),
-
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_home_top),
@@ -93,7 +92,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Welcom back, Mạnh",
+                        text = "Welcome back, Mạnh", // Đã sửa lỗi chính tả chữ Welcome
                         color = Color.White.copy(alpha = 0.7f),
                         fontSize = 16.sp
                     )
@@ -101,7 +100,7 @@ fun HomeScreen(
             }
 
             Spacer(modifier = Modifier.height(30.dp))
-            
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Box(modifier = Modifier.weight(1f)) {
                     SensorCard(
@@ -158,42 +157,42 @@ fun HomeScreen(
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(30.dp))
-            Row(
+
+            // --- THAY THẾ LAZYVERTICALGRID BẰNG COLUMN CHỨA ROWS ĐỂ TỰ ĐỘNG TÍNH CHIỀU CAO ---
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    DeviceSwitch(
-                        name = "Light", 
-                        icon = R.drawable.ic_light_led,
-                        isChecked = state.lightState.isChecked,
-                        isLoading = state.lightState.isLoading,
-                        onToggle = { isChecked ->
-                            viewModel.toggleDevice(Constants.DEVICE_LIGHT, if (isChecked) "ON" else "OFF")
+                val chunkedDevices = state.devices.chunked(3)
+                chunkedDevices.forEach { rowDevices ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        for (device in rowDevices) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                val iconRes = when {
+                                    device.name.contains("fan", ignoreCase = true) -> R.drawable.ic_fan
+                                    device.name.contains("ac", ignoreCase = true) -> R.drawable.ic_ac
+                                    else -> R.drawable.ic_light_led
+                                }
+                                DeviceSwitch(
+                                    name = device.name,
+                                    icon = iconRes,
+                                    isChecked = device.isChecked,
+                                    isLoading = device.isLoading,
+                                    onToggle = { isChecked ->
+                                        viewModel.toggleDevice(device.id, if (isChecked) "ON" else "OFF")
+                                    }
+                                )
+                            }
                         }
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    DeviceSwitch(
-                        name = "Fan", 
-                        icon = R.drawable.ic_fan,
-                        isChecked = state.fanState.isChecked,
-                        isLoading = state.fanState.isLoading,
-                        onToggle = { isChecked ->
-                            viewModel.toggleDevice(Constants.DEVICE_FAN, if (isChecked) "ON" else "OFF")
+                        // Box rỗng chiếm các phần trống để giữ đúng kích thước của lưới 3 cột
+                        val emptySpots = 3 - rowDevices.size
+                        for (i in 0 until emptySpots) {
+                            Spacer(modifier = Modifier.weight(1f))
                         }
-                    )
-                }
-                Box(modifier = Modifier.weight(1f)) {
-                    DeviceSwitch(
-                        name = "AC", 
-                        icon = R.drawable.ic_ac,
-                        isChecked = state.acState.isChecked,
-                        isLoading = state.acState.isLoading,
-                        onToggle = { isChecked ->
-                            viewModel.toggleDevice(Constants.DEVICE_AC, if (isChecked) "ON" else "OFF")
-                        }
-                    )
+                    }
                 }
             }
 

@@ -25,7 +25,7 @@ class HomeViewModel : ViewModel (){
         connectSocket()
         observeSensor()
         observeDeviceStatus()
-        fetchLatestDeviceStatus()
+        fetchDevicesAndStatus()
     }
 
     private fun observeSensor() {
@@ -44,33 +44,61 @@ class HomeViewModel : ViewModel (){
                     val deviceId = deviceIdStr.toIntOrNull() ?: return@let
                     val isChecked = status == "ON"
                     
-                    _state.value = when (deviceId) {
-                        Constants.DEVICE_FAN -> _state.value.copy(fanState = _state.value.fanState.copy(isChecked = isChecked, isLoading = false))
-                        Constants.DEVICE_LIGHT -> _state.value.copy(lightState = _state.value.lightState.copy(isChecked = isChecked, isLoading = false))
-                        Constants.DEVICE_AC -> _state.value.copy(acState = _state.value.acState.copy(isChecked = isChecked, isLoading = false))
-                        else -> _state.value
+                    var currentState = _state.value
+                    
+                    // Update dynamic list
+                    val updatedDevices = currentState.devices.map {
+                        if (it.id == deviceId) {
+                            it.copy(isChecked = isChecked, isLoading = false)
+                        } else {
+                            it
+                        }
                     }
+                    currentState = currentState.copy(devices = updatedDevices)
+                    
+                    _state.value = currentState
                 }
             }
         }
     }
 
-    private fun fetchLatestDeviceStatus() {
+    private fun fetchDevicesAndStatus() {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.apiService.getLatestDeviceStatus()
-                if (response.isSuccessful) {
-                    val statuses = response.body()?.data ?: emptyList()
+                // Fetch the list of devices
+                val deviceResponse = RetrofitClient.apiService.getDevices()
+                if (deviceResponse.isSuccessful) {
+                    val devicesData = deviceResponse.body()?.data ?: emptyList()
+                    val currentDevices = _state.value.devices.associateBy { it.id }
+                    
+                    val newDevices = devicesData.map { item ->
+                        currentDevices[item.id] ?: DeviceUiState(
+                            id = item.id,
+                            name = item.name,
+                            isChecked = false,
+                            isLoading = false
+                        )
+                    }
+                    _state.value = _state.value.copy(devices = newDevices)
+                }
+
+                // Fetch the latest status
+                val statusResponse = RetrofitClient.apiService.getLatestDeviceStatus()
+                if (statusResponse.isSuccessful) {
+                    val statuses = statusResponse.body()?.data ?: emptyList()
                     var currentState = _state.value
-                    statuses.forEach { statusInfo ->
-                        val isChecked = statusInfo.status == "ON"
-                        currentState = when (statusInfo.deviceId) {
-                            Constants.DEVICE_FAN -> currentState.copy(fanState = currentState.fanState.copy(isChecked = isChecked))
-                            Constants.DEVICE_LIGHT -> currentState.copy(lightState = currentState.lightState.copy(isChecked = isChecked))
-                            Constants.DEVICE_AC -> currentState.copy(acState = currentState.acState.copy(isChecked = isChecked))
-                            else -> currentState
+                    
+                    // Update dynamic list
+                    val updatedDevices = currentState.devices.map { device ->
+                        val statusInfo = statuses.find { it.deviceId == device.id }
+                        if (statusInfo != null) {
+                            device.copy(isChecked = statusInfo.status == "ON")
+                        } else {
+                            device
                         }
                     }
+                    currentState = currentState.copy(devices = updatedDevices)
+
                     _state.value = currentState
                 }
             } catch (e: Exception) {
@@ -81,23 +109,20 @@ class HomeViewModel : ViewModel (){
 
     fun toggleDevice(deviceId: Int, command: String) {
         // Set loading state
-        _state.value = when (deviceId) {
-            Constants.DEVICE_FAN -> _state.value.copy(fanState = _state.value.fanState.copy(isLoading = true))
-            Constants.DEVICE_LIGHT -> _state.value.copy(lightState = _state.value.lightState.copy(isLoading = true))
-            Constants.DEVICE_AC -> _state.value.copy(acState = _state.value.acState.copy(isLoading = true))
-            else -> _state.value
+        var currentState = _state.value
+        val updatedDevices = currentState.devices.map {
+            if (it.id == deviceId) it.copy(isLoading = true) else it
         }
+        currentState = currentState.copy(devices = updatedDevices)
+
+        _state.value = currentState
 
         viewModelScope.launch {
             // Start a parallel 5-second timeout
             launch {
                 delay(5000)
-                val isStillLoading = when (deviceId) {
-                    Constants.DEVICE_FAN -> _state.value.fanState.isLoading
-                    Constants.DEVICE_LIGHT -> _state.value.lightState.isLoading
-                    Constants.DEVICE_AC -> _state.value.acState.isLoading
-                    else -> false
-                }
+                val isStillLoading = _state.value.devices.find { it.id == deviceId }?.isLoading ?: false
+                
                 if (isStillLoading) {
                     resetLoading(deviceId)
                     _toastEvent.emit("Mất kết nối")
@@ -117,12 +142,13 @@ class HomeViewModel : ViewModel (){
     }
 
     private fun resetLoading(deviceId: Int) {
-        _state.value = when (deviceId) {
-            Constants.DEVICE_FAN -> _state.value.copy(fanState = _state.value.fanState.copy(isLoading = false))
-            Constants.DEVICE_LIGHT -> _state.value.copy(lightState = _state.value.lightState.copy(isLoading = false))
-            Constants.DEVICE_AC -> _state.value.copy(acState = _state.value.acState.copy(isLoading = false))
-            else -> _state.value
+        var currentState = _state.value
+        val updatedDevices = currentState.devices.map {
+            if (it.id == deviceId) it.copy(isLoading = false) else it
         }
+        currentState = currentState.copy(devices = updatedDevices)
+
+        _state.value = currentState
     }
 
     private fun updateState(json: JSONObject) {

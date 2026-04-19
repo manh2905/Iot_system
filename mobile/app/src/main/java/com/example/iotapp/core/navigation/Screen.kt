@@ -36,4 +36,11 @@ sealed class Screen(
         R.drawable.ic_profile_select,
         R.drawable.ic_profile_unselect
     )
+
+    object UsageStats : Screen(
+        "usagestats",
+        "Statistics",
+        R.drawable.ic_data_select,
+        R.drawable.ic_data_unselect
+    )
 }

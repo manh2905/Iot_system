@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import com.example.iotapp.presentation.actionhistory.ActionHistoryScreen
 import com.example.iotapp.presentation.datasensor.DataSensorScreen
 import com.example.iotapp.presentation.profile.ProfileScreen
+import com.example.iotapp.presentation.usagestats.UsageStatsScreen
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -48,6 +49,7 @@ fun NavGraph (navController : NavHostController) {
         composable(Screen.Home.route) { HomeScreen() }
         composable(Screen.DataSensor.route) { DataSensorScreen() }
         composable(Screen.ActionHistory.route) { ActionHistoryScreen() }
+        composable(Screen.UsageStats.route) { UsageStatsScreen() }
         composable(Screen.Profile.route) { ProfileScreen() }
     }
 }

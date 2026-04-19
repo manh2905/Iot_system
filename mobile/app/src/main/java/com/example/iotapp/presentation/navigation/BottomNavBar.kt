@@ -29,6 +29,7 @@ fun BottomNavBar (navController: NavHostController) {
         Screen.Home,
         Screen.DataSensor,
         Screen.ActionHistory,
+        Screen.UsageStats,
         Screen.Profile
     )
 

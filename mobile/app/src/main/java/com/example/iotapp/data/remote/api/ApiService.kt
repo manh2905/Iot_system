@@ -5,6 +5,7 @@ import com.example.iotapp.data.remote.dto.PaginatedSensorResponse
 import com.example.iotapp.data.remote.dto.SensorListResponse
 import com.example.iotapp.data.remote.dto.PaginatedActionResponse
 import com.example.iotapp.data.remote.dto.DeviceLatestStatusResponse
+import com.example.iotapp.data.remote.dto.DeviceListResponse
 import okhttp3.Request
 import retrofit2.Response
 import retrofit2.http.Body
@@ -35,6 +36,9 @@ interface ApiService {
     @GET("api/sensors")
     suspend fun getSensors(): Response<SensorListResponse>
 
+    @GET("api/devices")
+    suspend fun getDevices(): Response<DeviceListResponse>
+
     @GET("api/devices/latest-status")
     suspend fun getLatestDeviceStatus(): Response<DeviceLatestStatusResponse>
 
@@ -49,5 +53,10 @@ interface ApiService {
         @Query("sortOrder") sortOrder: String,
         @Query("date") date: String?
     ): Response<PaginatedActionResponse>
+
+    @GET("api/devices/action/count-by-day")
+    suspend fun getActionCountByDay(
+        @Query("date") date: String
+    ): Response<com.example.iotapp.data.remote.dto.DeviceActionCountResponse>
     
 }

@@ -2,7 +2,9 @@ package com.example.iotapp.presentation.home
 
 import androidx.navigationevent.NavigationEventHistory
 
-data class DeviceState(
+data class DeviceUiState(
+    val id: Int,
+    val name: String,
     val isChecked: Boolean = false,
     val isLoading: Boolean = false
 )
@@ -16,7 +18,5 @@ data class HomeState(
     val humHistory: List<Pair<Long, Double>> = emptyList(),
     val lightHistory: List<Pair<Long, Double>> = emptyList(),
 
-    val fanState: DeviceState = DeviceState(),
-    val lightState: DeviceState = DeviceState(),
-    val acState: DeviceState = DeviceState()
+    val devices: List<DeviceUiState> = emptyList(),
 )
